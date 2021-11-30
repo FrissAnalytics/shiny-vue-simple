@@ -6,7 +6,11 @@ function(input, output, session) {
  
  rVuexSetState("flights", flights %>% head )
  
- rVuexSetState("airports", flights %>% head )
+ rVuexSetState("airports", airports )
+ 
+ rVuexSetState("arcs", arcs )
+ 
+ rVuexSetState("flights_summary", flights_summary )
  
  observeEvent(input$vue_data, {
    

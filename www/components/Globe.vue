@@ -1,24 +1,23 @@
 <template>
-  <div class="globe-container text-center">
-    <div id="globe-info">
-      <v-btn x-small @click="increment()">update count</v-btn>
-    </div>
-    <div id="globe"></div>
-  </div>
+  <div id="globe"></div>
 </template>
 
 <script>
 module.exports = {
-  name: "about",
-
-  data() {
-    return {
-      count: 0,
-    };
-  },
+  name: "globe",
 
   mounted() {
     this.createGlobe();
+  },
+
+  computed: {
+    airports() {
+      return this.$store.getters.airports;
+    },
+
+    arcs() {
+      return this.$store.state.arcs;
+    },
   },
 
   methods: {
@@ -27,32 +26,56 @@ module.exports = {
 
       const globe = Globe()
         .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
-        .showAtmosphere(true)
-        .height(window.innerHeight - 100)
-        .width(window.innerWidth - 50);
+        .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+        .width(window.innerWidth)
+        .height(window.innerHeight - 48);
 
       this.globe = globe(el);
-
-      this.globe.controls().autoRotateSpeed = 0.8;
     },
 
-    increment() {
-      this.count++;
+    showAirports() {
+      this.setPointsData(this.airports, 4);
+    },
 
-      this.$bus.emit("shiny-data", this.count);
+    showArcs() {
+      const OPACITY = 0.5;
+
+      this.globe
+        .arcsData(this.arcs)
+        .arcStartLat((d) => +d.origin_lat)
+        .arcStartLng((d) => +d.origin_lng)
+        .arcEndLat((d) => +d.dest_lat)
+        .arcEndLng((d) => +d.dest_lng)
+        .arcColor((d) => [
+          `rgba(0, 255, 0, ${OPACITY})`,
+          `rgba(103, 58, 183, ${OPACITY})`,
+        ])
+        .arcsTransitionDuration(0);
+    },
+
+    setPointsData(pointsData, pointResolution = 30) {
+      this.globe
+        .pointsData(pointsData)
+        .pointAltitude((d) => d.pointAltitude)
+        .pointColor((d) => d.pointColor)
+        .pointLat((d) => d.pointLat)
+        .pointLng((d) => d.pointLng)
+        .pointRadius((d) => d.pointRadius)
+        .pointResolution(pointResolution);
+    },
+  },
+
+  watch: {
+    arcs() {
+      this.showArcs();
+    },
+
+    airports() {
+      this.showAirports();
     },
   },
 };
 </script>
 
 <style scoped>
-.globe-container {
-  position: relative;
-}
-
-#globe-info {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
 </style>
